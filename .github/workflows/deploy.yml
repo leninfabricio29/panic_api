@@ -1,27 +1,26 @@
-name: Deploy to Production
+name: Deploy to Server
 
 on:
   push:
-    branches: [ main, master ]
+    branches:
+      - main
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
+    - name: Checkout code
+      uses: actions/checkout@v4
 
-      - name: Save PEM Key
-        run: |
-          echo "${{ secrets.SSH_PRIVATE_KEY }}" > api_key.pem
-          chmod 600 api_key.pem
-
-      - name: Deploy over SSH with PEM
-        run: |
-          ssh -o StrictHostKeyChecking=no -i api_key.pem -p ${{ secrets.SSH_PORT }} ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} << 'EOF'
-            cd /home/${{ secrets.SSH_USER }}/panic_api
-            git pull origin main
-            npm install
-            pm2 restart ecosystem.config.js --env production
-          EOF
+    - name: Connect and Deploy
+      uses: appleboy/ssh-action@v0.1.6
+      with:
+        host: ${{ secrets.SSH_HOST }}
+        username: ${{ secrets.SSH_USER }}
+        key: ${{ secrets.SSH_PRIVATE_KEY }}
+        script: |
+          cd ~/home/panic_api
+          git pull origin main
+          npm install
+          pm2 restart ecosystem.config.js 
