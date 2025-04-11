@@ -23,4 +23,4 @@ jobs:
           cd ~/home/panic_api
           git pull origin main
           npm install
-          pm2 reload api_panic --env production
+          pm2 reload ecosystem.config.js --env production
