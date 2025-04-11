@@ -1,26 +1,68 @@
-name: Deploy to Server
+name: Deploy to Production
 
 on:
   push:
-    branches:
-      - main
+    branches: [ main, master ]  # Ejecutar en push a main o master
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
-
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
+      - name: Checkout code
+        uses: actions/checkout@v4
 
-    - name: Connect and Deploy
-      uses: appleboy/ssh-action@v0.1.6
-      with:
-        host: ${{ secrets.SSH_HOST }}
-        username: ${{ secrets.SSH_USER }}
-        key: ${{ secrets.SSH_PRIVATE_KEY }}
-        script: |
-          cd ~/home/panic_api
-          git pull origin main
-          npm install
-          pm2 restart ecosystem.config.js --env production
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build (if applicable)
+        run: |
+          if [ -f "webpack.config.js" ]; then
+            npm run build
+          fi
+
+      - name: Deploy to server
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USERNAME }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          port: ${{ secrets.SSH_PORT }}
+          script: |
+            # Asegurarse de que las herramientas necesarias están disponibles
+            export NVM_DIR="$HOME/.nvm"
+            [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # Cargar NVM si está instalado
+
+            # Navegar al directorio de la aplicación
+            cd /home/${{ secrets.SSH_USERNAME }}/api_project
+
+            # Verificar si el proceso existe en PM2 antes de intentar detenerlo
+            if pm2 list | grep -q "api_panic"; then
+              echo "Deteniendo proceso existente..."
+              pm2 stop api_panic || true
+              pm2 delete api_panic || true
+            else
+              echo "No existe proceso api_panic en PM2, continuando..."
+            fi
+
+            # Actualiza los archivos de configuración
+            echo "MONGO_URI=${{ secrets.MONGO_URI }}" > .env
+            echo "PORT=${{ secrets.PORT }}" >> .env
+            
+            # Obtén los últimos cambios
+            git fetch origin main
+            git reset --hard origin/main
+            
+            # Instala dependencias
+            npm ci
+
+            # Reiniciar la aplicación con PM2
+            pm2 restart ecosystem.config.js 
+
+            # Verificar si la aplicación se está ejecutando correctamente
+            pm2 status
