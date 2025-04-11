@@ -21,6 +21,7 @@ jobs:
         key: ${{ secrets.SSH_PRIVATE_KEY }}
         script: |
           cd ~/home/panic_api
-          git pull origin main
+          git fetch origin main
+          git reset --hard origin/main
           npm install
-          pm2 restart ecosystem.config.js 
+          pm2 restart ecosystem.config.js
