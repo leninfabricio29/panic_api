@@ -5,5 +5,5 @@ const PORT = process.env.PORT ; // Establece el puerto para el servidor
 
 // Iniciar el servidor
 app.listen(PORT, () => {
-  console.log(`Servidor corriendo en el puerto ${PORT}`);
+  console.log(`API activa en el puerto${PORT}`);
 });
