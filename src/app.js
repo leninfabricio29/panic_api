@@ -48,6 +48,8 @@ const userRoutes = require('./routes/user-routes');
 const authRoutes = require('./routes/auth-routes');
 const contactRoutes = require ('./routes/contact-routes');
 const neighborhoodRoutes = require ('./routes/neighborhood-routes');
+const notifyRoutes = require('./routes/notify-routes');
+
 
 
 // Usar las rutas
@@ -55,6 +57,7 @@ app.use('/api/users', userRoutes);
 app.use('/api/auth', authRoutes);
 app.use('/api/contacts', contactRoutes);
 app.use('/api/neighborhood', neighborhoodRoutes)
+app.use('/api/notify', notifyRoutes);
 
 // Exportar la app para que pueda ser utilizada por el servidor
 module.exports = app;

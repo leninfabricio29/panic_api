@@ -1,6 +1,12 @@
 const mongoose = require('mongoose');
 
 const UserSchema = new mongoose.Schema({
+  ci: {
+    type: String,
+    required: true,
+    unique: true,
+    //trim: true
+  },
   name: {
     type: String,
     required: true,
@@ -12,10 +18,6 @@ const UserSchema = new mongoose.Schema({
     unique: true,
     lowercase: true,
     trim: true
-  },
-  password: {
-    type: String,
-    required: true
   },
   phone: {
     type: String,
@@ -49,12 +51,16 @@ const UserSchema = new mongoose.Schema({
   },
   isActive: {
     type: Boolean,
-    default: true
+    default: false
   },
   role: {
     type: String,
     enum: ['user', 'admin'],
     default: 'user'
+  },
+  password: {
+    type: String,
+    required: false
   },
   neighborhood: {
     type: mongoose.Schema.Types.ObjectId,

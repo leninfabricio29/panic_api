@@ -1,37 +1,77 @@
 const User = require('../models/user-model');
 const Contact = require('../models/contact-model');
 const Neighborhood = require('../models/neighborhood-model')
+const Notify = require('../models/notify-model');
 const bcrypt = require('bcrypt');
 
 
 
 exports.register = async (req, res) => {
-    try {
-      const { name, email, password, phone, lastLocation, role } = req.body;
-  
-      // Encriptar la contraseña antes de guardarla
-      const salt = await bcrypt.genSalt(10);
-      const hashedPassword = await bcrypt.hash(password, salt);
-  
-      // Crear el nuevo usuario
-      const user = new User({
-        name,
-        email,
-        password: hashedPassword, // Guardar la contraseña encriptada
-        role, 
-        phone,
-        lastLocation: lastLocation || { type: 'Point', coordinates: [0.0, 0.0], }, // Ubicación predeterminada
-       
-      });
-  
-      // Guardar el usuario
-      await user.save();
-      res.status(201).json({ message: 'Usuario registrado exitosamente', user });
-    } catch (error) {
-      res.status(400).json({ error: error.message });
+  try {
+    const { ci, name, email, phone, lastLocation } = req.body;
+
+    // Crear el nuevo usuario
+    const user = new User({
+      ci,
+      name,
+      email,
+      phone,
+      lastLocation: lastLocation || { type: 'Point', coordinates: [0.0, 0.0] },
+    });
+
+    // Guardar el usuario
+    await user.save();
+
+    // Buscar todos los administradores
+    const admins = await User.find({ role: 'admin' });
+
+    if (admins.length > 0) {
+      // Crear notificaciones en paralelo
+      const notifications = admins.map(admin => ({
+        emitter: user._id,
+        receiver: admin._id,
+        title: 'Nuevo usuario registrado: Validar datos y generar credenciales',
+        message: `El usuario ${user.name} se ha registrado.`,
+      }));
+
+      // Insertar todas las notificaciones de una vez
+      await Notify.insertMany(notifications);
     }
-  };
-  
+
+    res.status(201).json({ message: 'Usuario registrado exitosamente', user });
+  } catch (error) {
+    console.error('Error al registrar usuario:', error);
+    res.status(500).json({ error: 'Ocurrió un error al registrar el usuario' });
+  }
+};
+
+
+exports.validateRegistration = async (req, res) => {
+  try {
+    const { userId } = req.body;
+
+    // Buscar el usuario por ID
+    const user = await User.findById(userId);
+    if (!user) return res.status(404).json({ error: 'Usuario no encontrado' });
+
+    // Generar el hash de la cédula para la contraseña
+    const hashedPassword = await bcrypt.hash(user.ci, 10); // 10 salt rounds
+
+    // Actualizar la contraseña y marcar como validado (opcional)
+    user.password = hashedPassword;
+    user.isActive = true; // <-- Solo si tienes un campo similar
+
+    // Guardar los cambios
+    await user.save();
+
+    res.json({ message: 'Usuario validado exitosamente, se han creado las credenciales', user });
+  } catch (error) {
+    console.error('Error al validar registro:', error);
+    res.status(500).json({ error: 'Ocurrió un error al validar el registro' });
+  }
+};
+
+
   
   exports.getUserById = async (req, res) => {
     try {

@@ -30,10 +30,6 @@ const ContactSchema = new mongoose.Schema({
     enum: ['call', 'push'],
     default: ['call', 'push']
   },
-  isEmergencyContact: {
-    type: Boolean,
-    default: true
-  },
   lastNotifiedAt: { type: Date, default: null }
 }, {
   timestamps: true

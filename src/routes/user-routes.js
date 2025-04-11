@@ -104,6 +104,8 @@ router.post('/register', userController.register);
  *       404:
  *         description: Usuario no encontrado
  */
+
+router.post('/validate', userController.validateRegistration);
 router.get('/:id', userController.getUserById);
 
 /**
