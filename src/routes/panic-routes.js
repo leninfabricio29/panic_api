@@ -6,6 +6,6 @@ const { protect } = require('../middlewares/auth');
 
 router.use(protect)
 
-router.post('/panic', authMiddleware, handlePanic);
+router.post('/alerta', handlePanic);
 
 module.exports = router;

@@ -1,10 +1,12 @@
-import { Expo } from 'expo-server-sdk';
-import Contact from '../models/contact-model.js';
-import User from '../models/user-model.js';
-import Notify from '../models/notify-model.js';
-const expo = new Expo();
+const  Contact = require ( '../models/contact-model.js');
+const  User  = require ('../models/user-model.js');
+const  Notify = require ('../models/notify-model.js');
 
-export const handlePanic = async (req, res) => {
+const { Expo } = require('expo-server-sdk');
+
+let expo = new Expo();
+
+const handlePanic = async (req, res) => {
   try {
     const userId = req.user.id;
     const user = await User.findById(userId);
@@ -73,3 +75,5 @@ export const handlePanic = async (req, res) => {
     res.status(500).json({ message: 'Error al enviar alerta de pánico' });
   }
 };
+
+module.exports = { handlePanic };
