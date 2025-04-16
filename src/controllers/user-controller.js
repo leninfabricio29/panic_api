@@ -138,7 +138,7 @@ exports.validateRegistration = async (req, res) => {
 
   exports.saveExpoToken = async (req, res) => {
     try {
-      const userId = req.user.id; // o req.body.userId si no usas auth
+      const userId = req.user.id;
       const { expoToken } = req.body;
   
       if (!expoToken) return res.status(400).json({ error: 'Token Expo requerido' });
@@ -157,6 +157,7 @@ exports.validateRegistration = async (req, res) => {
       res.status(500).json({ error: 'Error interno al guardar el token' });
     }
   };
+  
   
 
 
