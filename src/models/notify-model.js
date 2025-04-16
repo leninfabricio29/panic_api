@@ -17,6 +17,11 @@ const NotifySchema = new mongoose.Schema(
             required: true,
             trim: true
         },
+        type: {
+            type: String,
+            enum: ['registro', 'cambio-barrio', 'emergencia', 'reseteo'],
+            default: 'registro'
+          },
         message: {
             type: String,
             required: true,

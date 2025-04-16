@@ -136,6 +136,28 @@ exports.validateRegistration = async (req, res) => {
     }
   };
 
+  exports.saveExpoToken = async (req, res) => {
+    try {
+      const userId = req.user.id; // o req.body.userId si no usas auth
+      const { expoToken } = req.body;
+  
+      if (!expoToken) return res.status(400).json({ error: 'Token Expo requerido' });
+  
+      const user = await User.findByIdAndUpdate(
+        userId,
+        { fcmToken: expoToken },
+        { new: true }
+      );
+  
+      if (!user) return res.status(404).json({ error: 'Usuario no encontrado' });
+  
+      res.json({ message: 'Token Expo guardado con éxito', user });
+    } catch (error) {
+      console.error('Error al guardar token Expo:', error);
+      res.status(500).json({ error: 'Error interno al guardar el token' });
+    }
+  };
+  
 
 
 
