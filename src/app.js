@@ -3,6 +3,8 @@ const cors = require('cors');
 const connectDB = require("./config/db-config");
 const swaggerJsdoc = require('swagger-jsdoc');
 const swaggerUi = require('swagger-ui-express');
+const logger = require('./utils/logger'); // 👈 Importar el logger
+
 
 require('dotenv').config();
 
