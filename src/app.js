@@ -43,6 +43,33 @@ app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocs));
 // Conexión a la base de datos MongoDB
 connectDB();
 
+
+app.use((req, res, next) => {
+  const start = Date.now();
+
+  res.on('finish', () => {
+    const duration = Date.now() - start;
+
+    // Puedes filtrar campos sensibles aquí si deseas
+    const filteredBody = { ...req.body };
+    if (filteredBody.password) filteredBody.password = '***';
+
+    const logData = {
+      method: req.method,
+      url: req.originalUrl,
+      status: res.statusCode,
+      duration: `${duration}ms`,
+      timestamp: new Date().toISOString(),
+      ip: req.ip,
+      body: filteredBody
+    };
+
+    logger.info(JSON.stringify(logData, null, 2));
+  });
+
+  next();
+});
+
 // Rutas
 const userRoutes = require('./routes/user-routes');
 const authRoutes = require('./routes/auth-routes');
