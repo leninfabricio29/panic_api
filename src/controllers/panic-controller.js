@@ -60,10 +60,25 @@ const handlePanic = async (req, res) => {
       }
     }));
 
+    console.log('🟡 Tokens:', tokens);
+
     const chunks = expo.chunkPushNotifications(messages);
     for (const chunk of chunks) {
-      await expo.sendPushNotificationsAsync(chunk);
+      try {
+        const tickets = await expo.sendPushNotificationsAsync(chunk);
+        console.log('✅ Tickets enviados:', JSON.stringify(tickets, null, 2));
+    
+        tickets.forEach(ticket => {
+          if (ticket.status !== 'ok') {
+            console.error('❌ Error en ticket de Expo:', ticket);
+          }
+        });
+    
+      } catch (error) {
+        console.error('❌ Error al enviar notificaciones con Expo:', error);
+      }
     }
+    
 
     // 3. Guardar notificaciones en la base de datos
     await Notify.insertMany(notificationsToSave);
