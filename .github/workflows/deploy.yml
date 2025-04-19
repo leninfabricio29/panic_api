@@ -21,6 +21,12 @@ jobs:
         key: ${{ secrets.SSH_PRIVATE_KEY }}
         script: |
           cd ~/home/panic_api
+
+          echo "FIREBASE_CREDENTIALS='${{ secrets.FIREBASE_CREDENTIALS }}'" > .env
+          echo "JWT_SECRET='${{ secrets.JWT_SECRET }}'" >> .env
+          echo "MONGO_URI='${{ secrets.MONGO_URI }}'" >> .env
+          echo "PORT='${{ secrets.PORT }}'" >> .env
+
           git fetch origin main
           git reset --hard origin/main
           npm install
