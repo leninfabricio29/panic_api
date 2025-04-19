@@ -136,29 +136,46 @@ exports.validateRegistration = async (req, res) => {
     }
   };
 
-  exports.saveExpoToken = async (req, res) => {
+
+// --- Renombrar la función para reflejar que ahora guarda tokens FCM ---
+// Antes: exports.saveExpoToken = async (req, res) => {
+exports.saveFCMToken = async (req, res) => {
     try {
-      const userId = req.user.id;
-      const { expoToken } = req.body;
-  
-      if (!expoToken) return res.status(400).json({ error: 'Token Expo requerido' });
-  
-      const user = await User.findByIdAndUpdate(
-        userId,
-        { fcmToken: expoToken },
-        { new: true }
-      );
-  
-      if (!user) return res.status(404).json({ error: 'Usuario no encontrado' });
-  
-      res.json({ message: 'Token Expo guardado con éxito', user });
+        const userId = req.user.id;
+        // --- Cambiar el nombre del parámetro esperado en el cuerpo de la solicitud ---
+        // Antes: const { expoToken } = req.body;
+        const { fcmToken } = req.body; // Ahora esperamos un parámetro llamado 'fcmToken'
+
+        // --- Validar que el nuevo parámetro exista ---
+        // Antes: if (!expoToken) return res.status(400).json({ error: 'Token Expo requerido' });
+        if (!fcmToken) return res.status(400).json({ error: 'Token FCM requerido' });
+
+        // --- La lógica de actualización en la DB ya usaba 'fcmToken', así que solo nos aseguramos de pasar el nuevo valor ---
+        const user = await User.findByIdAndUpdate(
+            userId,
+            { fcmToken: fcmToken }, // Guardamos el valor del parámetro de entrada 'fcmToken'
+            { new: true }
+        );
+
+        if (!user) return res.status(404).json({ error: 'Usuario no encontrado' });
+
+        // --- Actualizar el mensaje de éxito ---
+        // Antes: res.json({ message: 'Token Expo guardado con éxito', user });
+        res.json({ message: 'Token FCM guardado con éxito', user });
+
     } catch (error) {
-      console.error('Error al guardar token Expo:', error);
-      res.status(500).json({ error: 'Error interno al guardar el token' });
+        // --- Actualizar el mensaje de error en la consola ---
+        // Antes: console.error('Error al guardar token Expo:', error);
+        console.error('Error al guardar token FCM:', error);
+        res.status(500).json({ error: 'Error interno al guardar el token' });
     }
-  };
-  
-  
+};
+
+// --- IMPORTANTE: Actualiza también la ruta en tu archivo de rutas ---
+// Si tenías algo como:
+// router.post('/users/token', userController.saveExpoToken);
+// Cámbialo para usar la nueva función y posiblemente una ruta más clara, por ejemplo:
+// router.post('/users/fcm-token', userController.saveFCMToken);
 
 
 

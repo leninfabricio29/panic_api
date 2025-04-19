@@ -17,7 +17,7 @@ router.get('/', userController.getUsers);
 router.put('/:id/location', userController.updateLocation);
 
 
-router.post('/token', protect , userController.saveExpoToken);
+router.post('/token', protect , userController.saveFCMToken);
 
 
 module.exports = router;
